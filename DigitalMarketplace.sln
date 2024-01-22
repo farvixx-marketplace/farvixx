@@ -1,0 +1,37 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.8.34408.163
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DigitalMarketplace.Api", "DigitalMarketplace.Api\DigitalMarketplace.Api.csproj", "{BFF93496-3D96-473D-B6EF-CA2646CEB180}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DigitalMarketplace.Core", "DigitalMarketplace.Core\DigitalMarketplace.Core.csproj", "{5E76E09E-0D31-4E6E-B467-2B5A0E78DCEA}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DigitalMarketplace.Infrastructure", "DigitalMarketplace.Infrastructure\DigitalMarketplace.Infrastructure.csproj", "{82F03078-5A45-4BF1-A7A6-4F7067EDE5DC}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{BFF93496-3D96-473D-B6EF-CA2646CEB180}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BFF93496-3D96-473D-B6EF-CA2646CEB180}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BFF93496-3D96-473D-B6EF-CA2646CEB180}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BFF93496-3D96-473D-B6EF-CA2646CEB180}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5E76E09E-0D31-4E6E-B467-2B5A0E78DCEA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5E76E09E-0D31-4E6E-B467-2B5A0E78DCEA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5E76E09E-0D31-4E6E-B467-2B5A0E78DCEA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5E76E09E-0D31-4E6E-B467-2B5A0E78DCEA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{82F03078-5A45-4BF1-A7A6-4F7067EDE5DC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{82F03078-5A45-4BF1-A7A6-4F7067EDE5DC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{82F03078-5A45-4BF1-A7A6-4F7067EDE5DC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{82F03078-5A45-4BF1-A7A6-4F7067EDE5DC}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {2E8B8B17-09C0-4C0E-94B0-B7700B4FFB08}
+	EndGlobalSection
+EndGlobal
