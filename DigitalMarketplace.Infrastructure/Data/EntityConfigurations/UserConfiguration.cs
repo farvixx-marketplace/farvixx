@@ -60,10 +60,9 @@ internal class UserConfiguration : IEntityTypeConfiguration<User>
 
         builder.HasOne(u => u.Currency);
 
-        builder.Property(u => u.CreatedAt)
-            .ValueGeneratedOnAdd();
+        builder.Property(u => u.CreatedAt);
 
         builder.Property(u => u.UpdatedAt)
-            .ValueGeneratedOnUpdate();
+            .HasComputedColumnSql("now()", true);
     }
 }

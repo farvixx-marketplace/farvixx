@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using DigitalMarketplace.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -12,9 +13,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace DigitalMarketplace.Infrastructure.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240125150428_UpdatedAt")]
+    partial class UpdatedAt
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -87,7 +90,7 @@ namespace DigitalMarketplace.Infrastructure.Migrations
                         .HasMaxLength(255)
                         .HasColumnType("character varying(255)");
 
-                    b.Property<DateTime?>("UpdatedAt")
+                    b.Property<DateTime>("UpdatedAt")
                         .ValueGeneratedOnUpdate()
                         .HasColumnType("timestamp with time zone");
 
@@ -161,7 +164,8 @@ namespace DigitalMarketplace.Infrastructure.Migrations
 
                     b.Property<DateTime>("CreatedAt")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp with time zone")
+                        .HasDefaultValue(new DateTime(2024, 1, 25, 15, 4, 27, 560, DateTimeKind.Utc).AddTicks(1556));
 
                     b.Property<string>("CurrencyName")
                         .IsRequired()
@@ -194,15 +198,17 @@ namespace DigitalMarketplace.Infrastructure.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("character varying(50)");
 
-                    b.Property<DateTime?>("UpdatedAt")
+                    b.Property<DateTime>("UpdatedAt")
                         .ValueGeneratedOnAddOrUpdate()
                         .HasColumnType("timestamp with time zone")
-                        .HasComputedColumnSql("now()", true);
+                        .HasDefaultValue(new DateTime(2024, 1, 25, 15, 4, 27, 560, DateTimeKind.Utc).AddTicks(2015));
 
                     b.Property<string>("Username")
                         .IsRequired()
+                        .ValueGeneratedOnAdd()
                         .HasMaxLength(55)
-                        .HasColumnType("character varying(55)");
+                        .HasColumnType("character varying(55)")
+                        .HasDefaultValueSql("[FirstName] + '-' + [LastName] + '-' + [Id]");
 
                     b.HasKey("Id");
 

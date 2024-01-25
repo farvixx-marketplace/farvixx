@@ -1,4 +1,5 @@
 ﻿using DigitalMarketplace.Core.Models;
+using DigitalMarketplace.Core.ValueObjects;
 using DigitalMarketplace.Infrastructure.Data.EntityConfigurations;
 using Microsoft.EntityFrameworkCore;
 
@@ -9,6 +10,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     public DbSet<Product> Products => Set<Product>();
     public DbSet<Category> Categories => Set<Category>();
     public DbSet<Tag> Tags => Set<Tag>();
+    public DbSet<Currency> Currency => Set<Currency>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

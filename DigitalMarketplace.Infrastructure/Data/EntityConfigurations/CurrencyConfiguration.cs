@@ -13,6 +13,10 @@ internal class CurrencyConfiguration : IEntityTypeConfiguration<Currency>
 
         builder.HasKey(c => c.Name);
 
+        builder.Property(c => c.Code)
+            .IsRequired()
+            .HasMaxLength(5);
+
         builder.Property(c => c.CurrencySymbol)
             .HasMaxLength(10);
 

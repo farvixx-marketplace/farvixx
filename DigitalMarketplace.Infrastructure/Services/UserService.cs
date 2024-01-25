@@ -1,4 +1,5 @@
-﻿using DigitalMarketplace.Core.Models;
+﻿using DigitalMarketplace.Core.DTOs;
+using DigitalMarketplace.Core.Models;
 using DigitalMarketplace.Core.Services;
 using DigitalMarketplace.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
@@ -18,6 +19,11 @@ public class UserService(ApplicationDbContext dbContext) : IUserService
             Username = newUser.Username,
             Email = newUser.Email,
         };
+        var currencyExists = await _dbContext.Currency.FindAsync(user.Currency.Name);
+        if (currencyExists != null)
+        {
+            user.Currency = currencyExists;
+        }
 
         await _dbContext.AddAsync(user, ct);
         await _dbContext.SaveChangesAsync(ct);
@@ -56,5 +62,33 @@ public class UserService(ApplicationDbContext dbContext) : IUserService
     {
         var users = await _dbContext.Users.Take(10).ToListAsync(ct);
         return users.Select(User.GetMinimal);
+    }
+
+    public async Task<int> UpdateUser(UpdateUserDto updateUser, CancellationToken ct = default)
+    {
+        var user = await _dbContext.Users
+            .Include(u => u.Categories.Where(t => updateUser.CategoryIds != null))
+            .Include(u => u.Tags.Where(t => updateUser.Tags != null))
+            .FirstOrDefaultAsync(u => u.Id == updateUser.Id, ct);
+        if (user is null)
+            return -1;
+
+        user.Update(updateUser);
+        if (updateUser.Tags != null)
+        {
+            var userTags = _dbContext.Tags.Where(updateUser.Tags.Contains).ToList();
+            if (userTags.Count != updateUser.Tags.Count)
+            {
+                var newUserTags = updateUser.Tags.Where(t => !userTags.Contains(t)).ToList();
+                foreach ( var t in newUserTags )
+                {
+                    _dbContext.Tags.Add(t);
+                }
+            }
+        }
+
+
+        await _dbContext.SaveChangesAsync(ct);
+        return user.Id;
     }
 }
