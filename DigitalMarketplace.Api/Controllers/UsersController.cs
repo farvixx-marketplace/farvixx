@@ -1,4 +1,5 @@
 ﻿using DigitalMarketplace.Core.DTOs;
+using DigitalMarketplace.Core.DTOs.Users;
 using DigitalMarketplace.Core.Models;
 using DigitalMarketplace.Core.Services;
 using Microsoft.AspNetCore.Mvc;
@@ -11,13 +12,18 @@ public class UsersController(IUserService userService) : ControllerBase
     private readonly IUserService _userService = userService;
 
     [HttpGet]
-    public async Task<IEnumerable<MinimalUser>> GetUsers(CancellationToken ct) => await _userService.GetUsers(cancellationToken: ct);
+    public async Task<ServiceResponse<IEnumerable<GetUserDto>>> GetUsers(CancellationToken ct) => await _userService.GetUsers(cancellationToken: ct);
 
     [HttpPost]
-    public async Task<int> AddUser(MinimalUser user, CancellationToken ct) => await _userService.AddUser(user, cancellationToken: ct);
+    public async Task<ServiceResponse<Guid>> AddUser(AddUserDto user, CancellationToken ct)
+    {
+        // TODO: Add Checks About ServiceResponse
 
-    [HttpGet("{id:int}")]
-    public async Task<ActionResult<User?>> GetUserById(int id, CancellationToken ct)
+        return await _userService.AddUser(user, cancellationToken: ct);
+    }
+
+    [HttpGet("{id:guid}")]
+    public async Task<ActionResult<User?>> GetUserById(Guid id, CancellationToken ct)
     {
         var user = await _userService.GetUser(id, cancellationToken: ct);
         if (user == null)
@@ -26,22 +32,23 @@ public class UsersController(IUserService userService) : ControllerBase
         return Ok(user);
     }
 
-    [HttpDelete("{id:int}")]
-    public async Task<int> DeleteUser(int id, CancellationToken ct)
+    [HttpDelete("{id:guid}")]
+    public async Task<Guid> DeleteUser(Guid id, CancellationToken ct)
     {
-        return await _userService.DeleteUser(id, cancellationToken: ct);
+        // TODO: Add ServiceResponse Checks
+
+        return (await _userService.DeleteUser(id, cancellationToken: ct)).Data;
     }
 
-    [HttpPatch("{id:int}")]
-    public async Task<ActionResult<int>> UpdateUser(int id, UpdateUserDto updateUserDto, CancellationToken ct)
+    [HttpPatch("{id:guid}")]
+    public async Task<ActionResult<Guid>> UpdateUser(Guid id, UpdateUserDto updateUserDto, CancellationToken ct)
     {
-        updateUserDto = updateUserDto with { Id = id };
-        var updatedUserId = await _userService.UpdateUser(updateUserDto, ct);
-        if (updatedUserId < 0)
+        var updatedUserId = await _userService.UpdateUser(id, updateUserDto, ct);
+        if (!updatedUserId.Success || updatedUserId.Data == Guid.Empty)
         {
-            return NotFound();
+            return NotFound(updatedUserId.Error);
         }
 
-        return updatedUserId;
+        return updatedUserId.Data;
     }
 }

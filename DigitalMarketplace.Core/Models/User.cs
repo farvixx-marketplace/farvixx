@@ -1,18 +1,17 @@
-﻿using DigitalMarketplace.Core.DTOs;
+﻿using DigitalMarketplace.Core.DTOs.Users;
 using DigitalMarketplace.Core.ValueObjects;
+using Microsoft.AspNetCore.Identity;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace DigitalMarketplace.Core.Models;
-public class User : BaseEntity
+public class User : IdentityUser<Guid>, IBaseEntity
 {
     public string ImageUri { get; set; } = string.Empty;
     public string FirstName { get; set; }
     public string LastName { get; set; }
-    public string Username { get; set; }
-    public string Email { get; set; }
 
-    public Location? Location { get; set; }
+    public Location Location { get; set; } = new Location { Country = "United States of America", Alpha2Code = "US" };
     public string? Gender { get; set; }
-    public string? Phone { get; set; }
     public DateTime? BirthDate { get; set; }
 
     public decimal Balance { get; set; }
@@ -25,15 +24,18 @@ public class User : BaseEntity
     public string Bio { get; set; } = string.Empty;
 
     public List<Product> Products { get; set; } = [];
+    [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+    public DateTime CreatedAt { get; }
+    public DateTime? UpdatedAt { get; }
 
-    public static MinimalUser GetMinimal(User user)
+    public static GetUserDto GetUserDto(User user)
     {
-        return new MinimalUser(user.Id,
+        return new GetUserDto(user.Id,
                                user.ImageUri,
                                user.FirstName,
                                user.LastName,
-                               user.Username,
-                               user.Email);
+                               user.Email,
+                               user.UserName);
     }
 
     public User Update(UpdateUserDto updateUser)
@@ -41,8 +43,6 @@ public class User : BaseEntity
         ImageUri = updateUser.ImageUri ?? ImageUri;
         FirstName = updateUser.FirstName ?? FirstName;
         LastName = updateUser.LastName ?? LastName;
-        Username = updateUser.Username ?? Username;
-        Email = updateUser.Email ?? Email;
 
         if (Location is null)
         {
@@ -62,7 +62,6 @@ public class User : BaseEntity
         }
 
         Gender = updateUser.Gender ?? Gender;
-        Phone = updateUser.Phone ?? Phone;
         BirthDate = updateUser.BirthDate ?? BirthDate;
         Bio = updateUser.Bio ?? Bio;
 

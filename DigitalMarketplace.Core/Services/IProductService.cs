@@ -1,10 +1,16 @@
-﻿using DigitalMarketplace.Core.Models;
+﻿using DigitalMarketplace.Core.DTOs;
+using DigitalMarketplace.Core.DTOs.Products;
+using DigitalMarketplace.Core.Enums;
 
 namespace DigitalMarketplace.Core.Services;
 public interface IProductService
 {
-    Task<IEnumerable<Product>> GetProducts();
-    Task<Product> GetProductById(int productId);
-    Task<int> AddProduct(Product product);
-    Task<int> DeleteProduct(int productId);
+    Task<ServiceResponse<IEnumerable<GetProductDto>>> GetProducts();
+    Task<ServiceResponse<GetProductFullDto>> GetProductById(Guid productId);
+    Task<ServiceResponse<Guid>> AddProduct(Guid userId, AddProductDto product);
+    Task<ServiceResponse<Guid>> DeleteProduct(Guid productId);
+    Task<ServiceResponse<Guid>> UpdateProduct(Guid productId, UpdateProductDto updateProduct);
+    Task<ServiceResponse<bool>> ChangeProductStatus(Guid productId, AdStatus status);
+    Task<ServiceResponse<IEnumerable<GetProductDto>>> GetUsersProducts(Guid userId);
+    Task<ServiceResponse<IEnumerable<GetProductDto>>> GetSimilarProducts(Guid productId);
 }

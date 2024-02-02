@@ -9,13 +9,17 @@ public static class DependencyInjection
 {
     public static IServiceCollection AddInfrastructure(this IServiceCollection services, string connectionString)
     {
-        services.AddDbContext<ApplicationDbContext>(options => 
+        services.AddDbContext<ApplicationDbContext>(options =>
         {
             options.UseNpgsql(connectionString);
             options.EnableSensitiveDataLogging(true);
         });
 
         services.AddScoped<IUserService, UserService>();
+        services.AddScoped<IProductService, ProductService>();
+
+        services.AddScoped<IAuthService, AuthService>();
+        services.AddScoped<ITokenService, TokenService>();
 
         return services;
     }

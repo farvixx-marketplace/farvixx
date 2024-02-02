@@ -24,8 +24,7 @@ internal class ProductConfiguration : IEntityTypeConfiguration<Product>
         builder.Property(p => p.Price)
             .IsRequired();
 
-        builder.ComplexProperty(p => p.Currency)
-            .IsRequired();
+        builder.HasOne(p => p.Currency);
 
         builder.Property(p => p.CreatedAt)
             .ValueGeneratedOnAdd();

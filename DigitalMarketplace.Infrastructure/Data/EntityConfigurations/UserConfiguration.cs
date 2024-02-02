@@ -7,8 +7,6 @@ internal class UserConfiguration : IEntityTypeConfiguration<User>
 {
     public void Configure(EntityTypeBuilder<User> builder)
     {
-        builder.HasKey(u => u.Id);
-
         builder.Property(u => u.FirstName)
             .HasMaxLength(25)
             .IsRequired();
@@ -17,27 +15,22 @@ internal class UserConfiguration : IEntityTypeConfiguration<User>
             .HasMaxLength(25)
             .IsRequired();
 
-        builder.Property(u => u.Username)
-            .HasMaxLength(55)
-            .IsRequired();
-
-        builder.HasIndex(u => u.Username)
-            .IsUnique();
-
-        builder.Property(u => u.Email)
+        builder.ComplexProperty(u => u.Location)
+            .Property(l => l.Country)
             .HasMaxLength(50)
             .IsRequired();
 
-        builder.HasIndex(u => u.Email)
-            .IsUnique();
+        builder.ComplexProperty(u => u.Location)
+            .Property(l => l.Alpha2Code)
+            .IsFixedLength()
+            .HasMaxLength(2)
+            .IsRequired();
 
-        builder.OwnsOne(u => u.Location)
-            .WithOwner();
-
-        builder.Property(u => u.Gender)
+        builder.ComplexProperty(u => u.Location)
+            .Property(l => l.City)
             .HasMaxLength(50);
 
-        builder.Property(u => u.Phone)
+        builder.Property(u => u.Gender)
             .HasMaxLength(50);
 
         builder.OwnsMany(u => u.Languages)
@@ -62,7 +55,6 @@ internal class UserConfiguration : IEntityTypeConfiguration<User>
 
         builder.Property(u => u.CreatedAt);
 
-        builder.Property(u => u.UpdatedAt)
-            .HasComputedColumnSql("now()", true);
+        builder.Property(u => u.UpdatedAt);
     }
 }
