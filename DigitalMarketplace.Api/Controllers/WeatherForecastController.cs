@@ -27,6 +27,8 @@ public class WeatherForecastController(ILogger<WeatherForecastController> logger
     }
 
     [HttpGet("GetToken")]
-    [Authorize]
-    public async Task<string?> GetToken() => await HttpContext.GetTokenAsync("access_token");
+    public string GetToken()
+    {
+        return (string)HttpContext.Items["UserId"]!;
+    }
 }

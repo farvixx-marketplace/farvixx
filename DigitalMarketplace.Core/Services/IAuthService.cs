@@ -7,5 +7,6 @@ public interface IAuthService
     Task<ServiceResponse<Tokens>> Login(LoginUserDto loginUserDto);
     Task<ServiceResponse<Tokens>> Refresh(string refreshToken);
     Task<ServiceResponse<Tokens>> Register(RegisterUserDto registerUserDto);
-    Task<bool> InvalidateTokens(string? accessToken = null, string? refreshToken = null);
+    Task<ServiceResponse<bool>> InvalidateTokens(string? accessToken = null, string? refreshToken = null);
+    Task<ServiceResponse<Tokens>> ExternalLogin(string loginProvider, string credentialResponse);
 }

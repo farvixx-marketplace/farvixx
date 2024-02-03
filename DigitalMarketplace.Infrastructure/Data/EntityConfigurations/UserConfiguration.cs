@@ -15,20 +15,24 @@ internal class UserConfiguration : IEntityTypeConfiguration<User>
             .HasMaxLength(25)
             .IsRequired();
 
-        builder.ComplexProperty(u => u.Location)
+        builder.OwnsOne(u => u.Location)
+            .WithOwner();
+
+        builder.OwnsOne(u => u.Location)
             .Property(l => l.Country)
             .HasMaxLength(50)
             .IsRequired();
 
-        builder.ComplexProperty(u => u.Location)
+        builder.OwnsOne(u => u.Location)
             .Property(l => l.Alpha2Code)
             .IsFixedLength()
             .HasMaxLength(2)
             .IsRequired();
 
-        builder.ComplexProperty(u => u.Location)
+        builder.OwnsOne(u => u.Location)
             .Property(l => l.City)
             .HasMaxLength(50);
+        //builder.Ignore(u => u.Location);
 
         builder.Property(u => u.Gender)
             .HasMaxLength(50);

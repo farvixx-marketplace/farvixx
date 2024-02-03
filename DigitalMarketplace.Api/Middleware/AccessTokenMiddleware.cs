@@ -1,7 +1,5 @@
-﻿using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.Extensions.Configuration;
+﻿using DigitalMarketplace.Core.Services;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Text;
@@ -15,8 +13,8 @@ public class AccessTokenMiddleware(RequestDelegate next, IConfiguration configur
 
     public async Task Invoke(HttpContext httpContext)
     {
-        var accessToken = await httpContext.GetTokenAsync("access_token");
-        if (accessToken == null)
+        var accessToken = (httpContext.Request.Headers.FirstOrDefault(h => h.Key == "Authorization")).Value.ToString().Split(' ')[^1];
+        if (string.IsNullOrWhiteSpace(accessToken))
         { 
             await _next(httpContext);
             return;

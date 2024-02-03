@@ -6,22 +6,22 @@ using System.ComponentModel.DataAnnotations.Schema;
 namespace DigitalMarketplace.Core.Models;
 public class User : IdentityUser<Guid>, IBaseEntity
 {
-    public string ImageUri { get; set; } = string.Empty;
+    public string? ImageUri { get; set; }
     public string FirstName { get; set; }
     public string LastName { get; set; }
 
-    public Location Location { get; set; } = new Location { Country = "United States of America", Alpha2Code = "US" };
+    public Location? Location { get; set; }/* = new Location { Country = "United States of America", Alpha2Code = "US" };*/
     public string? Gender { get; set; }
     public DateTime? BirthDate { get; set; }
 
-    public decimal Balance { get; set; }
+    public decimal Balance { get; set; } = 0;
     public Currency Currency { get; set; } = new Currency { Name = "United States Dollar", Code = "USD", CurrencySymbol = "$", HtmlCode = "&#36;" };
 
     public List<Language> Languages { get; set; } = [];
     public List<Tag> Tags { get; set; } = [];
     public List<Category> Categories { get; set; } = [];
     public List<ExternalResource> ExternalResources { get; set; } = [];
-    public string Bio { get; set; } = string.Empty;
+    public string? Bio { get; set; }
 
     public List<Product> Products { get; set; } = [];
     [DatabaseGenerated(DatabaseGeneratedOption.Identity)]

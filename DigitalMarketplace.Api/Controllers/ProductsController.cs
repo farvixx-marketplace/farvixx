@@ -1,6 +1,5 @@
 ﻿using DigitalMarketplace.Core.DTOs;
 using DigitalMarketplace.Core.DTOs.Products;
-using DigitalMarketplace.Core.Models;
 using DigitalMarketplace.Core.Services;
 using Microsoft.AspNetCore.Mvc;
 

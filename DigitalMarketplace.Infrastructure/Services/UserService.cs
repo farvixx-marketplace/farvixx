@@ -45,9 +45,9 @@ public class UserService(ApplicationDbContext dbContext) : IUserService
         return serviceResponse.Succeed(user.Id);
     }
 
-    public async Task<ServiceResponse<User?>> GetUser(Guid? id = null, string? username = null, string? email = null, CancellationToken ct = default)
+    public async Task<ServiceResponse<User>> GetUser(Guid? id = null, string? username = null, string? email = null, CancellationToken ct = default)
     {
-        var serviceResponse = new ServiceResponse<User?>();
+        var serviceResponse = new ServiceResponse<User>();
 
         var users = _dbContext.Users
                 .Include(u => u.Products)
@@ -61,7 +61,7 @@ public class UserService(ApplicationDbContext dbContext) : IUserService
         if (string.IsNullOrWhiteSpace(email))
             return serviceResponse.Succeed(await users.FirstOrDefaultAsync(u => u.Email!.Equals(email, StringComparison.CurrentCultureIgnoreCase), ct));
 
-        return null;
+        return serviceResponse.Failed(null, "User could not be found");
     }
 
     public async Task<ServiceResponse<IEnumerable<GetUserDto>>> GetUsers(CancellationToken ct = default)

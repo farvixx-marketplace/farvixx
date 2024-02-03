@@ -1,3 +1,4 @@
+using DigitalMarketplace.Api.Middleware;
 using DigitalMarketplace.Core.Models;
 using DigitalMarketplace.Infrastructure;
 using DigitalMarketplace.Infrastructure.Data;
@@ -44,7 +45,7 @@ builder.Services.AddAuthentication(options =>
             ValidateAudience = false,
             ValidateIssuer = true,
             ValidateLifetime = true,
-            ValidIssuers = builder.Configuration.GetSection("JwtConfig:IssuerHttps").Value?.Split(';'),
+            ValidIssuers = builder.Configuration.GetSection("JwtConfig:Issuer").Value?.Split(';'),
             ValidAudiences = builder.Configuration.GetSection("JwtConfig:Audience").Value?.Split(';')
         };
     });
@@ -66,6 +67,8 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+app.UseMiddleware<AccessTokenMiddleware>();
 
 app.UseAuthorization();
 
