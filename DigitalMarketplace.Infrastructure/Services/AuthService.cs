@@ -2,6 +2,7 @@
 using DigitalMarketplace.Core.DTOs.Auth;
 using DigitalMarketplace.Core.Models;
 using DigitalMarketplace.Core.Services;
+using DigitalMarketplace.Infrastructure.Data;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
@@ -13,11 +14,13 @@ namespace DigitalMarketplace.Infrastructure.Services;
 public class AuthService(
     UserManager<User> userManager,
     ITokenService tokenService,
-    IConfiguration configuration) : IAuthService
+    IConfiguration configuration,
+    ApplicationDbContext dbContext) : IAuthService
 {
     private readonly UserManager<User> _userManager = userManager;
     private readonly ITokenService _tokenService = tokenService;
     private readonly IConfiguration _configuration = configuration;
+    private readonly ApplicationDbContext _dbContext = dbContext;
 
     public async Task<ServiceResponse<Tokens>> Login(LoginUserDto loginUserDto)
     {
@@ -47,20 +50,31 @@ public class AuthService(
         if ((await _userManager.FindByEmailAsync(registerUserDto.Email)) is not null)
             return serviceResponse.Failed(null, "Email is already taken");
 
-        var creationResult = await _userManager.CreateAsync(new User
+        User? user = new User
         {
             FirstName = registerUserDto.FirstName ?? "Unnamed",
             LastName = registerUserDto.LastName ?? "Unnamed",
             UserName = registerUserDto.Username,
             Email = registerUserDto.Email
-        }, registerUserDto.Password);
+    };
 
-        var user = await _userManager.FindByNameAsync(registerUserDto.Username);
+        var creationResult = await _userManager.CreateAsync(user, registerUserDto.Password);
+        user.Currency = await _dbContext.Currency.FindAsync("USD");
+
+        user = await _userManager.FindByNameAsync(registerUserDto.Username);
         if (!creationResult.Succeeded || user is null)
-            return serviceResponse.Failed(null, "New account creation failed, please try again");
+            return serviceResponse.Failed(
+                        null,
+                        string.Format(
+                            CultureInfo.InvariantCulture,
+                            "Failed: {0}",
+                            string.Join(", ",
+                                        creationResult.Errors.Select(e => $"Code: {e.Code} Description: {e.Description}"))));
 
         var roles = await _userManager.GetRolesAsync(user);
         var tokens = _tokenService.GenerateTokens(User.GetUserDto(user), roles);
+
+        await _dbContext.SaveChangesAsync();
 
         return serviceResponse.Succeed(tokens);
     }

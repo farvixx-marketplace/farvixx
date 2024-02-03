@@ -22,7 +22,7 @@ public class AccessTokenMiddleware(RequestDelegate next, IConfiguration configur
 
         var handler = new JwtSecurityTokenHandler();
 
-        TokenValidationParameters validationParameters = new()
+        var validationParameters = new TokenValidationParameters
         {
             ValidateIssuerSigningKey = true,
             IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration.GetValue<string>("JwtConfig:Key")!)),
@@ -33,17 +33,24 @@ public class AccessTokenMiddleware(RequestDelegate next, IConfiguration configur
             ValidAudiences = _configuration.GetSection("JwtConfig:Audience").Value?.Split(';')
         };
 
-        var validationResult = await handler.ValidateTokenAsync(accessToken, validationParameters);
-        if (!validationResult.IsValid)
+        //var validationResult = await handler.ValidateTokenAsync(accessToken, validationParameters);
+        //if (!validationResult.IsValid)
+        //{
+        //    await _next(httpContext);
+        //    return;
+        //}
+
+        var claims = handler.ReadJwtToken(accessToken).Claims;
+
+        var userIdString = claims.FirstOrDefault(c => c.Type == JwtRegisteredClaimNames.Sub)?.Value;
+        if (userIdString == null)
         {
             await _next(httpContext);
             return;
         }
 
-        var claims = handler.ReadJwtToken(accessToken).Claims;
-
-        var userId = claims.FirstOrDefault(c => c.Type == JwtRegisteredClaimNames.Sub)?.Value;
-        if (userId == null)
+        var result = Guid.TryParse(userIdString, out Guid userId);
+        if (!result)
         {
             await _next(httpContext);
             return;

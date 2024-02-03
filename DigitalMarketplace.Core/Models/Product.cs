@@ -16,6 +16,6 @@ public class Product : IBaseEntity
     public AdStatus AdStatus { get; set; } = AdStatus.Hidden;
 
     [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-    public DateTime CreatedAt { get; set; }
+    public DateTime? CreatedAt { get; set; }
     public DateTime? UpdatedAt { get; set; }
 }

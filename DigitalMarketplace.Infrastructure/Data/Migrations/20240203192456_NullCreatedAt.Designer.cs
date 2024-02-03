@@ -3,6 +3,7 @@ using System;
 using DigitalMarketplace.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace DigitalMarketplace.Infrastructure.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240203192456_NullCreatedAt")]
+    partial class NullCreatedAt
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -176,6 +179,7 @@ namespace DigitalMarketplace.Infrastructure.Migrations
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("CurrencyCode")
+                        .IsRequired()
                         .HasColumnType("character varying(5)");
 
                     b.Property<string>("Email")
@@ -437,7 +441,9 @@ namespace DigitalMarketplace.Infrastructure.Migrations
                 {
                     b.HasOne("DigitalMarketplace.Core.Models.Currency", "Currency")
                         .WithMany()
-                        .HasForeignKey("CurrencyCode");
+                        .HasForeignKey("CurrencyCode")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.OwnsMany("DigitalMarketplace.Core.ValueObjects.ExternalResource", "ExternalResources", b1 =>
                         {

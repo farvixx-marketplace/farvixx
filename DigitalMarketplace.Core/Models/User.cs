@@ -15,7 +15,7 @@ public class User : IdentityUser<Guid>, IBaseEntity
     public DateTime? BirthDate { get; set; }
 
     public decimal Balance { get; set; } = 0;
-    public Currency Currency { get; set; } = new Currency { Name = "United States Dollar", Code = "USD", CurrencySymbol = "$", HtmlCode = "&#36;" };
+    public Currency? Currency { get; set; }
 
     public List<Language> Languages { get; set; } = [];
     public List<Tag> Tags { get; set; } = [];
@@ -25,7 +25,7 @@ public class User : IdentityUser<Guid>, IBaseEntity
 
     public List<Product> Products { get; set; } = [];
     [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-    public DateTime CreatedAt { get; }
+    public DateTime? CreatedAt { get; }
     public DateTime? UpdatedAt { get; }
 
     public static GetUserDto GetUserDto(User user)

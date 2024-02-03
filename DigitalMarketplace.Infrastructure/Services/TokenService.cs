@@ -75,7 +75,7 @@ public class TokenService : ITokenService
         {
             claims.Add(new Claim(ClaimTypes.Role, role));
         }
-        var expiresInMinutes = Convert.ToDouble(_configuration["JwtConfig:DurationMinutes"]);
+        var expiresInMinutes = Convert.ToDouble(_configuration["ExpiresInMinutes"]);
 
         var accessToken = new JwtSecurityToken(
             issuer: _issuer,
