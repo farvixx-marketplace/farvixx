@@ -11,5 +11,29 @@ public class ProductsController(IProductService productService) : ControllerBase
     private readonly IProductService _productService = productService;
 
     [HttpGet]
-    public async Task<ServiceResponse<IEnumerable<GetProductDto>>> GetProductsAsync() => await _productService.GetProducts();
+    public async Task<ActionResult<ServiceResponse<IEnumerable<GetProductDto>>>> GetProductsAsync() => await _productService.GetProducts();
+
+    [HttpGet("id/{productId:guid}")]
+    public async Task<ActionResult<ServiceResponse<GetProductFullDto>>> GetProductById(Guid productId)
+    {
+        var response = new ServiceResponse<GetProductFullDto>();
+        try
+        {
+            response = await _productService.GetProductById(productId);
+        }
+        catch (Exception)
+        {
+            return StatusCode(500, "Please try again later. We are trying to resolve the issue");
+        }
+
+        if (response.Success && response.Data is null)
+            return NotFound(response);
+
+        if (!response.Success)
+        {
+            return StatusCode(500, response.Error);
+        }
+
+        return response;
+    }
 }

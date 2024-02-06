@@ -17,7 +17,10 @@ bool devMode = builder.Environment.IsDevelopment();
 string connectionString = builder.Configuration
     .GetConnectionString($"{(devMode ? "Development" : "Production")}PostgreSql")!;
 
-builder.Services.AddInfrastructure(connectionString);
+string mailjetKey = builder.Configuration.GetSection("MailjetConfig:ApiKey").Value!;
+string mailjetSecret = builder.Configuration.GetSection("MailjetConfig:ApiSecret").Value!;
+
+builder.Services.AddInfrastructure(connectionString, mailjetKey, mailjetSecret);
 
 builder.Services.AddIdentity<User, IdentityRole<Guid>>(options =>
 {
@@ -43,7 +46,7 @@ builder.Services.AddAuthentication(options =>
             ValidateIssuerSigningKey = true,
             IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration.GetValue<string>("JwtConfig:Key")!)),
             ValidateAudience = false,
-            ValidateIssuer = false,
+            ValidateIssuer = true,
             ValidateLifetime = true,
             ValidIssuers = builder.Configuration.GetSection("JwtConfig:Issuer").Value?.Split(';'),
             ValidAudiences = builder.Configuration.GetSection("JwtConfig:Audience").Value?.Split(';')

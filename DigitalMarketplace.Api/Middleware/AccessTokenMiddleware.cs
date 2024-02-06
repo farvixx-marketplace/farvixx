@@ -13,7 +13,10 @@ public class AccessTokenMiddleware(RequestDelegate next, IConfiguration configur
 
     public async Task Invoke(HttpContext httpContext)
     {
-        var accessToken = (httpContext.Request.Headers.FirstOrDefault(h => h.Key == "Authorization")).Value.ToString().Split(' ')[^1];
+        var accessToken = httpContext.Request.Headers
+            .FirstOrDefault(h => h.Key == "Authorization")
+            .Value.ToString()
+            .Split(' ')[^1];
         if (string.IsNullOrWhiteSpace(accessToken))
         { 
             await _next(httpContext);
@@ -26,19 +29,19 @@ public class AccessTokenMiddleware(RequestDelegate next, IConfiguration configur
         {
             ValidateIssuerSigningKey = true,
             IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration.GetValue<string>("JwtConfig:Key")!)),
-            ValidateAudience = true,
+            ValidateAudience = false,
             ValidateIssuer = true,
             ValidateLifetime = true,
             ValidIssuers = _configuration.GetSection("JwtConfig:Issuer").Value?.Split(';'),
             ValidAudiences = _configuration.GetSection("JwtConfig:Audience").Value?.Split(';')
         };
 
-        //var validationResult = await handler.ValidateTokenAsync(accessToken, validationParameters);
-        //if (!validationResult.IsValid)
-        //{
-        //    await _next(httpContext);
-        //    return;
-        //}
+        var validationResult = await handler.ValidateTokenAsync(accessToken, validationParameters);
+        if (!validationResult.IsValid)
+        {
+           await _next(httpContext);
+           return;
+        }
 
         var claims = handler.ReadJwtToken(accessToken).Claims;
 

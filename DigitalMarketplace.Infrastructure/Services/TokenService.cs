@@ -29,8 +29,8 @@ public class TokenService : ITokenService
         }
         _key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Key"]!));
 
-        _issuer = configuration["Issuer"]?.Split(';')[0]!;
-        _audience = configuration["Audience"]?.Split(';')[0]!;
+        _issuer = _configuration["Issuer"]?.Split(';')[0]!;
+        _audience = _configuration["Audience"]?.Split(';')[0]!;
 
         _credentials = new SigningCredentials(_key, SecurityAlgorithms.HmacSha256Signature);
 
@@ -38,11 +38,11 @@ public class TokenService : ITokenService
         {
             ValidateIssuerSigningKey = true,
             IssuerSigningKey = _key,
-            ValidateAudience = true,
+            ValidateAudience = false,
             ValidateIssuer = true,
             ValidateLifetime = true,
-            ValidIssuers = configuration["Issuer"]?.Split(';'),
-            ValidAudiences = configuration["Audience"]?.Split(';')
+            ValidIssuers = _configuration["Issuer"]?.Split(';'),
+            ValidAudiences = _configuration["Audience"]?.Split(';')
         };
 
         _handler = new();

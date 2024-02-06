@@ -2,16 +2,20 @@
 using DigitalMarketplace.Core.DTOs.Users;
 using DigitalMarketplace.Core.Models;
 using DigitalMarketplace.Core.Services;
+using DigitalMarketplace.Infrastructure.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 
 namespace DigitalMarketplace.Api.Controllers;
 [Route("api/[controller]")]
 [ApiController]
-public class AccountController(IUserService userService) : ControllerBase
+public class AccountController(IUserService userService,
+    IEmailService emailSender) : ControllerBase
 {
     private readonly IUserService _userService = userService;
+    private readonly IEmailService _emailSender = emailSender;
 
     [HttpGet("profile")]
     [Authorize]
@@ -25,37 +29,94 @@ public class AccountController(IUserService userService) : ControllerBase
         }
         var userId = (Guid)HttpContext.Items["UserId"]!;
 
-        User? user;
         try
         {
-            user = (await _userService.GetUser(id: userId))?.Data;
+            response = await _userService.GetUser(id: userId);
         }
         catch (Exception)
         {
             return StatusCode(500, "Please try again later. We are trying to resolve the issue");
         }
-        if (user == null)
+        if (response == null)
         {
-            return NotFound();
+            return NotFound(response);
         }
 
-        return response.Succeed(new GetUserFullDto(user.Id, 
-            user.ImageUri,
-            user.FirstName,
-            user.LastName,
-            user.UserName,
-            user.Email,
-            user.PhoneNumber,
-            user.Location,
-            user.Balance,
-            user.Currency,
-            user.Gender,
-            user.BirthDate,
-            user.Languages,
-            user.Tags,
-            user.Categories,
-            user.ExternalResources,
-            user.Bio
-            ));
+        return Ok(response);
     }
+
+    [HttpPost("update-password")]
+    [Authorize]
+    public async Task<ActionResult> UpdatePassword([FromForm] string oldPassword, [FromForm] string newPassword)
+    {
+        Guid id = (Guid)HttpContext.Items["UserId"]!;
+        ServiceResponse<Guid?> response;
+
+        try
+        {
+            response = await _userService.UpdatePassword(id, oldPassword, newPassword);
+        }
+        catch (Exception)
+        {
+            return StatusCode(500, "Please try again later. We are trying to resolve the issue");
+        }
+
+        if (!response.Success)
+        {
+            return Unauthorized(response);
+        }
+
+        return Ok(response);
+    }
+
+    [HttpPost("update-email")]
+    [Authorize]
+    public async Task<ActionResult> UpdateEmail([FromForm] string email)
+    {
+        Guid id = (Guid)HttpContext.Items["UserId"]!;
+        ServiceResponse<Guid?> response;
+
+        try
+        {
+            response = await _userService.UpdateEmail(id, email);
+        }
+        catch (Exception)
+        {
+            return StatusCode(500, "Please try again later. We are trying to resolve the issue");
+        }
+
+        if (!response.Success)
+        {
+            return Unauthorized(response);
+        }
+
+        return Ok(response);
+    }
+
+    [HttpPost("update-username")]
+    [Authorize]
+    public async Task<ActionResult> UpdateUsername([FromForm] string username)
+    {
+        Guid id = (Guid)HttpContext.Items["UserId"]!;
+        ServiceResponse<Guid?> response;
+
+        try
+        {
+            response = await _userService.UpdateUsername(id, username);
+        }
+        catch (Exception)
+        {
+            return StatusCode(500, "Please try again later. We are trying to resolve the issue");
+        }
+
+        if (!response.Success)
+        {
+            return Unauthorized(response);
+        }
+
+        return Ok(response);
+    }
+
+    [HttpPost("send-email")]
+    public async Task SendEmail(string to) => await _emailSender.SendEmailAsync(to, "Test email", "test email");
 }

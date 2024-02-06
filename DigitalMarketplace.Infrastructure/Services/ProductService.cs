@@ -74,7 +74,7 @@ public class ProductService(ApplicationDbContext dbContext) : IProductService
             product.Owner.Products = [];
 
         if (product is null)
-            return serviceResponse.Failed(null, "Could not find product with given Id");
+            return serviceResponse.Succeed(null);
 
         var productDto = new GetProductFullDto(Id: product.Id, product.Title, product.Description, product.Price, product.Currency, product.Category, product.Tags.Select(t => t.Name).ToArray(), product.AdStatus);
 
@@ -100,9 +100,18 @@ public class ProductService(ApplicationDbContext dbContext) : IProductService
         throw new NotImplementedException();
     }
 
-    public Task<ServiceResponse<IEnumerable<GetProductDto>>> GetUsersProducts(Guid userId)
+    public async Task<ServiceResponse<IEnumerable<GetProductDto>>> GetUsersProducts(Guid userId)
     {
-        throw new NotImplementedException();
+        var serviceResponse = new ServiceResponse<IEnumerable<GetProductDto>>();
+
+        var products = (await _dbContext.Products.Include(p => p.Owner).Where(p => p.Owner.Id == userId).Take(50).ToArrayAsync()).Select(p => new GetProductDto(
+            Id: p.Id,
+            Title: p.Title,
+            Currency: p.Currency,
+            Price: p.Price,
+            Category: p.Category,
+            AdStatus: p.AdStatus));
+        return serviceResponse.Succeed(products);
     }
 
     public Task<ServiceResponse<Guid>> UpdateProduct(Guid productId, UpdateProductDto updateProduct)
