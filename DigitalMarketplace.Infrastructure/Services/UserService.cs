@@ -4,7 +4,10 @@ using DigitalMarketplace.Core.Models;
 using DigitalMarketplace.Core.Services;
 using DigitalMarketplace.Infrastructure.Data;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.EntityFrameworkCore;
+using System.Text;
+using System.Web;
 
 namespace DigitalMarketplace.Infrastructure.Services;
 public class UserService(
@@ -15,6 +18,28 @@ public class UserService(
     private readonly ApplicationDbContext _dbContext = dbContext;
     private readonly UserManager<User> _userManager = userManager;
     private readonly IEmailService _emailService = emailService;
+
+    public async Task<ServiceResponse<Guid?>> ConfirmEmail(Guid id, string tokenEncoded)
+    {
+        var serviceResponse = new ServiceResponse<Guid?>();
+
+        var user = await _userManager.FindByIdAsync(id.ToString());
+        if (user is null)
+            return serviceResponse.Failed(null, "User with given id could not be found");
+
+        //byte[] tokenBytes = WebEncoders.Base64UrlDecode(tokenEncoded);
+        //var token = Encoding.UTF8.GetString(tokenBytes);
+        var validationResult = await _userManager.ConfirmEmailAsync(user, tokenEncoded);
+        if (validationResult.Succeeded)
+            return serviceResponse.Succeed(id);
+
+        var newToken = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+        //byte[] newTokenBytes = Encoding.UTF8.GetBytes(newToken);
+        //var newTokenEncoded = WebEncoders.Base64UrlEncode(newTokenBytes);
+
+        var emailResult = await _emailService.SendEmailConfirmationLetter(user.Email!, HttpUtility.UrlEncode(newToken));
+        return serviceResponse.Failed(null, string.Join(", ", validationResult.Errors.Select(e => e.Description)) ?? "");
+    }
 
     public async Task<ServiceResponse<Guid?>> DeleteUser(Guid id, CancellationToken ct = default)
     {
@@ -78,13 +103,29 @@ public class UserService(
         return serviceResponse.Succeed(users.Select(User.GetUserDto));
     }
 
+    public async Task<ServiceResponse<Guid?>> ResendConfirmationLetter(Guid id)
+    {
+        var response = new ServiceResponse<Guid?>();
+
+        var user = await _userManager.FindByIdAsync(id.ToString());
+        if (user is null)
+            return response.Failed(null, "User with given id does not exist");
+
+        var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+        var emailResult = await _emailService.SendEmailConfirmationLetter(user.Email!, token);
+        if (!emailResult.Success)
+            return response.Failed(null, emailResult.Error ?? "");
+
+        return response.Succeed(id);
+    }
+
     public async Task<ServiceResponse<Guid?>> UpdateEmail(Guid id, string email)
     {
         var serviceResponse = new ServiceResponse<Guid?>();
 
         var user = await _userManager.FindByIdAsync(id.ToString());
         if (user is null)
-            return serviceResponse.Failed(null, "User is non existent");
+            return serviceResponse.Failed(null, "User with given id does not exist");
 
         await _userManager.GenerateChangeEmailTokenAsync(user, email);
 

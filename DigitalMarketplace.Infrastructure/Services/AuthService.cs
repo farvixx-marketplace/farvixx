@@ -4,10 +4,14 @@ using DigitalMarketplace.Core.Models;
 using DigitalMarketplace.Core.Services;
 using DigitalMarketplace.Infrastructure.Data;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
+using Newtonsoft.Json.Linq;
 using System.Globalization;
 using System.IdentityModel.Tokens.Jwt;
+using System.Text;
+using System.Web;
 using JwtRegisteredClaims = System.IdentityModel.Tokens.Jwt.JwtRegisteredClaimNames;
 
 namespace DigitalMarketplace.Infrastructure.Services;
@@ -15,12 +19,14 @@ public class AuthService(
     UserManager<User> userManager,
     ITokenService tokenService,
     IConfiguration configuration,
-    ApplicationDbContext dbContext) : IAuthService
+    ApplicationDbContext dbContext,
+    IEmailService emailService) : IAuthService
 {
     private readonly UserManager<User> _userManager = userManager;
     private readonly ITokenService _tokenService = tokenService;
     private readonly IConfiguration _configuration = configuration;
     private readonly ApplicationDbContext _dbContext = dbContext;
+    private readonly IEmailService _emailService = emailService;
 
     public async Task<ServiceResponse<Tokens>> Login(LoginUserDto loginUserDto)
     {
@@ -56,11 +62,10 @@ public class AuthService(
             LastName = registerUserDto.LastName ?? "Unnamed",
             UserName = registerUserDto.Username,
             Email = registerUserDto.Email
-    };
+        };
 
         var creationResult = await _userManager.CreateAsync(user, registerUserDto.Password);
-        user.Currency = await _dbContext.Currency.FindAsync("USD");
-
+        
         user = await _userManager.FindByNameAsync(registerUserDto.Username);
         if (!creationResult.Succeeded || user is null)
             return serviceResponse.Failed(
@@ -74,6 +79,14 @@ public class AuthService(
         var roles = await _userManager.GetRolesAsync(user);
         var tokens = _tokenService.GenerateTokens(User.GetUserDto(user), roles);
 
+        
+
+        var emailConfirmationToken = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+        //byte[] tokenBytes = Encoding.UTF8.GetBytes(emailConfirmationToken);
+        //var tokenEncoded = WebEncoders.Base64UrlEncode(tokenBytes);
+        var result = await _emailService.SendEmailConfirmationLetter(user.Email!, HttpUtility.UrlEncode(emailConfirmationToken));
+
+        user.Currency = await _dbContext.Currency.FindAsync("USD");
         await _dbContext.SaveChangesAsync();
 
         return serviceResponse.Succeed(tokens);

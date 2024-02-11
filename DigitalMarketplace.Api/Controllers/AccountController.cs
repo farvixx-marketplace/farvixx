@@ -117,6 +117,12 @@ public class AccountController(IUserService userService,
         return Ok(response);
     }
 
-    [HttpPost("send-email")]
-    public async Task SendEmail(string to) => await _emailSender.SendEmailAsync(to, "Test email", "test email");
+    [HttpGet("confirm-email")]
+    [Authorize]
+    public async Task<IActionResult> ConfirmUserEmail(string token)
+    {
+        var result = await _userService.ConfirmEmail((Guid)HttpContext.Items["UserId"]!, token);
+
+        return Ok(result);
+    }
 }

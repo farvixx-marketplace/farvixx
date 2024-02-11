@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 namespace DigitalMarketplace.Infrastructure.Services;
 public interface IEmailService
 {
-    Task<ServiceResponse<MessageResult>> SendEmailAsync(string email, string content, string subject);
-    Task<ServiceResponse<IEnumerable<MessageResult>>> SendEmailAsync(IEnumerable<string> email, string content, string subject);
+    Task<ServiceResponse<MessageResult>> SendEmailAsync(string email, string content, string subject, IDictionary<string, object>? variables = default);
+    Task<ServiceResponse<MessageResult>> SendEmailConfirmationLetter(string email, string token);
+    Task<ServiceResponse<IEnumerable<MessageResult>>> SendEmailsAsync(IEnumerable<string> email, string content, string subject, IEnumerable<IDictionary<string, object>>? variables = default);
 }
