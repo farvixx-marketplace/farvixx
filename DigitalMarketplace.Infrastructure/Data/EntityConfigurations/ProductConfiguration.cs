@@ -24,6 +24,9 @@ internal class ProductConfiguration : IEntityTypeConfiguration<Product>
         builder.Property(p => p.Price)
             .IsRequired();
 
+        builder.Property(p => p.Content)
+            .IsRequired();
+
         builder.HasOne(p => p.Currency);
 
         builder.Property(p => p.CreatedAt)

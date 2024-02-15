@@ -13,4 +13,7 @@ public interface IProductService
     Task<ServiceResponse<bool>> ChangeProductStatus(Guid productId, AdStatus status);
     Task<ServiceResponse<IEnumerable<GetProductDto>>> GetUsersProducts(Guid userId);
     Task<ServiceResponse<IEnumerable<GetProductDto>>> GetSimilarProducts(Guid productId);
+    Task<ServiceResponse<string>> UploadProductContent(Stream fileStream, string fileName);
+    Task<ServiceResponse<Stream>> DownloadProductContent(string fileName);
+    Task DeleteProductContent(string fileName);
 }

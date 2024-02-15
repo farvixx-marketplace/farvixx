@@ -15,6 +15,8 @@ public class Product : IBaseEntity
     public string Description { get; set; }
     public AdStatus AdStatus { get; set; } = AdStatus.Hidden;
 
+    public string Content { get; set; } = string.Empty;
+
     [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
     public DateTime? CreatedAt { get; set; }
     public DateTime? UpdatedAt { get; set; }

@@ -19,8 +19,9 @@ string connectionString = builder.Configuration
 
 string mailjetKey = builder.Configuration.GetSection("MailjetConfig:ApiKey").Value!;
 string mailjetSecret = builder.Configuration.GetSection("MailjetConfig:ApiSecret").Value!;
+string bunnyCDNKey = builder.Configuration.GetSection("BunnyCDN:Key").Value!;
 
-builder.Services.AddInfrastructure(connectionString, mailjetKey, mailjetSecret);
+builder.Services.AddInfrastructure(connectionString, mailjetKey, mailjetSecret, bunnyCDNKey);
 
 builder.Services.AddIdentity<User, IdentityRole<Guid>>(options =>
 {
@@ -72,6 +73,8 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 
 app.UseMiddleware<AccessTokenMiddleware>();
+
+
 
 app.UseAuthorization();
 

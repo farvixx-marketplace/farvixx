@@ -1,15 +1,20 @@
-﻿using DigitalMarketplace.Core.DTOs;
+﻿using BunnyCDN.Net.Storage;
+using DigitalMarketplace.Core.DTOs;
 using DigitalMarketplace.Core.DTOs.Products;
 using DigitalMarketplace.Core.Enums;
 using DigitalMarketplace.Core.Models;
 using DigitalMarketplace.Core.Services;
 using DigitalMarketplace.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
+using System.IO;
 
 namespace DigitalMarketplace.Infrastructure.Services;
-public class ProductService(ApplicationDbContext dbContext) : IProductService
+public class ProductService(
+    ApplicationDbContext dbContext,
+    BunnyCDNStorage bunnyCDNStorage) : IProductService
 {
     private readonly ApplicationDbContext _dbContext = dbContext;
+    private readonly BunnyCDNStorage _storage = bunnyCDNStorage;
 
     public async Task<ServiceResponse<Guid>> AddProduct(Guid userId, AddProductDto newProduct)
     {
@@ -58,7 +63,6 @@ public class ProductService(ApplicationDbContext dbContext) : IProductService
     {
         throw new NotImplementedException();
     }
-
 
     public async Task<ServiceResponse<GetProductFullDto>> GetProductById(Guid productId)
     {
@@ -117,5 +121,45 @@ public class ProductService(ApplicationDbContext dbContext) : IProductService
     public Task<ServiceResponse<Guid>> UpdateProduct(Guid productId, UpdateProductDto updateProduct)
     {
         throw new NotImplementedException();
+    }
+
+    public async Task<ServiceResponse<string>> UploadProductContent(Stream fileStream, string fileName)
+    {
+        var response = new ServiceResponse<string>();
+
+        var fileExtension = Path.GetExtension(fileName);
+
+        fileName = Path.GetFileNameWithoutExtension(fileName);
+        foreach (var invalidChar in Path.GetInvalidFileNameChars())
+        {
+            fileName = fileName.Replace(invalidChar, '-');
+        }
+
+        fileName = $"{fileName}-{Guid.NewGuid()}";
+        // combine new name and extension
+        var newFileName = fileName + fileExtension;
+
+        await _storage.UploadAsync(fileStream, $"/main-storage-45/user-content/{newFileName}");
+
+        return response.Succeed(newFileName);
+    }
+
+    public async Task DeleteProductContent(string fileName)
+    {
+        await _storage.DeleteObjectAsync($"/main-storage-45/user-content/{fileName}");
+    }
+
+    public async Task<ServiceResponse<Stream>> DownloadProductContent(string fileName)
+    {
+        var response = new ServiceResponse<Stream>();
+
+        var stream = await _storage.DownloadObjectAsStreamAsync($"/main-storage-45/user-content/{fileName}");
+
+        if (stream == null)
+        {
+            return response.Failed(null, "Content could not be found");
+        }
+
+        return response.Succeed(stream);
     }
 }

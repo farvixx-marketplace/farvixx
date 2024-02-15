@@ -2,6 +2,7 @@
 using Mailjet.Client;
 using Mailjet.Client.TransactionalEmails;
 using Mailjet.Client.TransactionalEmails.Response;
+using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,15 +14,18 @@ public class EmailService : IEmailService
 {
     private readonly IMailjetClient _client;
     private readonly TransactionalEmailBuilder _emailBuilder;
+    private readonly string _host = "";
 
     TransactionalEmailBuilder EmailBuilder { get => _emailBuilder.Clone(); }
 
-    public EmailService(IMailjetClient mailjetClient)
+    public EmailService(IMailjetClient mailjetClient, IConfiguration configuration)
     {
         _client = mailjetClient;
 
         _emailBuilder = new TransactionalEmailBuilder();
         _emailBuilder.WithFrom(new ("m.rusnachenko@outlook.com", "Farvix"));
+
+        _host = configuration.GetSection("JwtConfig:Issuer").Value!.Split(';')[0];
     }
 
     public async Task<ServiceResponse<MessageResult>> SendEmailAsync(string toEmail, string content, string subject, IDictionary<string, object>? variables = default)
@@ -76,12 +80,17 @@ public class EmailService : IEmailService
     public async Task<ServiceResponse<MessageResult>> SendEmailConfirmationLetter(string toEmail, string token)
     {
         var serviceResponse = new ServiceResponse<MessageResult>();
-
+        var link = new UriBuilder(_host);
+        link.Path = "api/account/confirm-email";
         var email = EmailBuilder.WithSubject("Confirm your email address")
                //.WithHtmlPart(content)
                .WithTemplateId(5684263)
                .WithTo(new SendContact(toEmail))
-               .WithVariables(new Dictionary<string, object>{ { "token", token } })
+               .WithVariables(new Dictionary<string, object>
+               { 
+                   { "token", token },
+                   { "link", $"{link}?token={token}" }
+               })
                .WithTemplateLanguage(true)
                .Build();
 

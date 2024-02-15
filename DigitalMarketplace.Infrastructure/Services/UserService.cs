@@ -19,9 +19,12 @@ public class UserService(
     private readonly UserManager<User> _userManager = userManager;
     private readonly IEmailService _emailService = emailService;
 
-    public async Task<ServiceResponse<Guid?>> ConfirmEmail(Guid id, string tokenEncoded)
+    public async Task<ServiceResponse<Guid?>> ConfirmEmail(string tokenEncoded)
     {
         var serviceResponse = new ServiceResponse<Guid?>();
+
+        var id = Guid.Parse(tokenEncoded.Split(';')[0]);
+        var token = string.Join("", tokenEncoded.Split(';')[1..]);
 
         var user = await _userManager.FindByIdAsync(id.ToString());
         if (user is null)
@@ -29,15 +32,15 @@ public class UserService(
 
         //byte[] tokenBytes = WebEncoders.Base64UrlDecode(tokenEncoded);
         //var token = Encoding.UTF8.GetString(tokenBytes);
-        var validationResult = await _userManager.ConfirmEmailAsync(user, tokenEncoded);
+        var validationResult = await _userManager.ConfirmEmailAsync(user, token);
         if (validationResult.Succeeded)
             return serviceResponse.Succeed(id);
 
-        var newToken = await _userManager.GenerateEmailConfirmationTokenAsync(user);
-        //byte[] newTokenBytes = Encoding.UTF8.GetBytes(newToken);
-        //var newTokenEncoded = WebEncoders.Base64UrlEncode(newTokenBytes);
+        //var newToken = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+        ////byte[] newTokenBytes = Encoding.UTF8.GetBytes(newToken);
+        ////var newTokenEncoded = WebEncoders.Base64UrlEncode(newTokenBytes);
 
-        var emailResult = await _emailService.SendEmailConfirmationLetter(user.Email!, HttpUtility.UrlEncode(newToken));
+        //var emailResult = await _emailService.SendEmailConfirmationLetter(user.Email!, HttpUtility.UrlEncode($"{user.Id};{newToken}"));
         return serviceResponse.Failed(null, string.Join(", ", validationResult.Errors.Select(e => e.Description)) ?? "");
     }
 
@@ -112,7 +115,7 @@ public class UserService(
             return response.Failed(null, "User with given id does not exist");
 
         var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
-        var emailResult = await _emailService.SendEmailConfirmationLetter(user.Email!, token);
+        var emailResult = await _emailService.SendEmailConfirmationLetter(user.Email!, HttpUtility.UrlEncode($"{user.Id};{token}"));
         if (!emailResult.Success)
             return response.Failed(null, emailResult.Error ?? "");
 

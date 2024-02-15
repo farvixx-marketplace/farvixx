@@ -12,6 +12,6 @@ public interface IUserService
     Task<ServiceResponse<Guid?>> UpdatePassword(Guid id, string oldPassword, string newPassword);
     Task<ServiceResponse<Guid?>> UpdateEmail(Guid id, string email);
     Task<ServiceResponse<Guid?>> UpdateUsername(Guid id, string username);
-    Task<ServiceResponse<Guid?>> ConfirmEmail(Guid id, string token);
+    Task<ServiceResponse<Guid?>> ConfirmEmail(string token);
     Task<ServiceResponse<Guid?>> ResendConfirmationLetter(Guid id);
 }

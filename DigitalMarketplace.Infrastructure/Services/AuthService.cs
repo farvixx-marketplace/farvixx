@@ -84,7 +84,7 @@ public class AuthService(
         var emailConfirmationToken = await _userManager.GenerateEmailConfirmationTokenAsync(user);
         //byte[] tokenBytes = Encoding.UTF8.GetBytes(emailConfirmationToken);
         //var tokenEncoded = WebEncoders.Base64UrlEncode(tokenBytes);
-        var result = await _emailService.SendEmailConfirmationLetter(user.Email!, HttpUtility.UrlEncode(emailConfirmationToken));
+        var result = await _emailService.SendEmailConfirmationLetter(user.Email!, HttpUtility.UrlEncode($"{user.Id};{emailConfirmationToken}"));
 
         user.Currency = await _dbContext.Currency.FindAsync("USD");
         await _dbContext.SaveChangesAsync();

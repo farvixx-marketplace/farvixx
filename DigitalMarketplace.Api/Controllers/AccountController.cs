@@ -1,24 +1,19 @@
 ﻿using DigitalMarketplace.Core.DTOs;
 using DigitalMarketplace.Core.DTOs.Users;
-using DigitalMarketplace.Core.Models;
 using DigitalMarketplace.Core.Services;
-using DigitalMarketplace.Infrastructure.Services;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 
 namespace DigitalMarketplace.Api.Controllers;
 [Route("api/[controller]")]
 [ApiController]
-public class AccountController(IUserService userService,
-    IEmailService emailSender) : ControllerBase
+[Authorize]
+public class AccountController(
+    IUserService userService) : ControllerBase
 {
     private readonly IUserService _userService = userService;
-    private readonly IEmailService _emailSender = emailSender;
 
     [HttpGet("profile")]
-    [Authorize]
     public async Task<ActionResult<ServiceResponse<GetUserFullDto>>> GetUserProfile()
     {
         ServiceResponse<GetUserFullDto> response = new();
@@ -46,7 +41,6 @@ public class AccountController(IUserService userService,
     }
 
     [HttpPost("update-password")]
-    [Authorize]
     public async Task<ActionResult> UpdatePassword([FromForm] string oldPassword, [FromForm] string newPassword)
     {
         Guid id = (Guid)HttpContext.Items["UserId"]!;
@@ -70,7 +64,6 @@ public class AccountController(IUserService userService,
     }
 
     [HttpPost("update-email")]
-    [Authorize]
     public async Task<ActionResult> UpdateEmail([FromForm] string email)
     {
         Guid id = (Guid)HttpContext.Items["UserId"]!;
@@ -94,7 +87,6 @@ public class AccountController(IUserService userService,
     }
 
     [HttpPost("update-username")]
-    [Authorize]
     public async Task<ActionResult> UpdateUsername([FromForm] string username)
     {
         Guid id = (Guid)HttpContext.Items["UserId"]!;
@@ -118,10 +110,27 @@ public class AccountController(IUserService userService,
     }
 
     [HttpGet("confirm-email")]
-    [Authorize]
+    [AllowAnonymous]
     public async Task<IActionResult> ConfirmUserEmail(string token)
     {
-        var result = await _userService.ConfirmEmail((Guid)HttpContext.Items["UserId"]!, token);
+        var result = await _userService.ConfirmEmail(token);
+        if (!result.Success)
+        {
+            return Unauthorized(result);
+        }
+
+        return Ok(result);
+    }
+
+    [HttpGet("resend-confirmation-email")]
+    public async Task<IActionResult> ResendConfirmEmail()
+    {
+        var userId = (Guid)HttpContext.Items["UserId"]!;
+        var result = await _userService.ResendConfirmationLetter(userId);
+        if (!result.Success)
+        {
+            return Unauthorized(result);
+        }
 
         return Ok(result);
     }
