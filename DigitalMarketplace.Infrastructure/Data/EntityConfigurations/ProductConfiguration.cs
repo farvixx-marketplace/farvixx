@@ -17,15 +17,15 @@ internal class ProductConfiguration : IEntityTypeConfiguration<Product>
             .HasColumnType("text")
             .IsRequired();
 
-        builder.HasOne(p => p.Category);
+        builder.HasOne(p => p.Category)
+            .WithMany(c => c.Products);
 
         builder.HasMany(p => p.Tags);
 
         builder.Property(p => p.Price)
             .IsRequired();
 
-        builder.Property(p => p.Content)
-            .IsRequired();
+        builder.Property(p => p.Content);
 
         builder.HasOne(p => p.Currency);
 

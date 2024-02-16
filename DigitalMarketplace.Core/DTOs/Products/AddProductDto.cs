@@ -7,4 +7,5 @@ public record AddProductDto(string Title,
     string Description,
     decimal Price,
     string Currency = "USD",
+    string? Content = null,
     AdStatus AdStatus = AdStatus.Hidden);

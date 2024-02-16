@@ -1,10 +1,5 @@
 ﻿using DigitalMarketplace.Core.DTOs;
 using Mailjet.Client.TransactionalEmails.Response;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace DigitalMarketplace.Infrastructure.Services;
 public interface IEmailService

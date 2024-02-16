@@ -3,11 +3,6 @@ using Mailjet.Client;
 using Mailjet.Client.TransactionalEmails;
 using Mailjet.Client.TransactionalEmails.Response;
 using Microsoft.Extensions.Configuration;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace DigitalMarketplace.Infrastructure.Services;
 public class EmailService : IEmailService

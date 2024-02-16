@@ -4,13 +4,10 @@ using DigitalMarketplace.Core.Models;
 using DigitalMarketplace.Core.Services;
 using DigitalMarketplace.Infrastructure.Data;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
-using Newtonsoft.Json.Linq;
 using System.Globalization;
 using System.IdentityModel.Tokens.Jwt;
-using System.Text;
 using System.Web;
 using JwtRegisteredClaims = System.IdentityModel.Tokens.Jwt.JwtRegisteredClaimNames;
 

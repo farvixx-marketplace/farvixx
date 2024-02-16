@@ -13,13 +13,16 @@ internal class CategoryConfigutation : IEntityTypeConfiguration<Category>
             .IsRequired()
             .HasMaxLength(50);
 
-        builder.HasIndex(c => c.Name)
-            .IsUnique();
-
         builder.HasOne(c => c.Parent)
             .WithMany(c => c.Children);
 
         builder.HasMany(c => c.Children)
             .WithOne(c => c.Parent);
+
+        builder.HasMany(c => c.Users)
+            .WithMany(u => u.Categories);
+
+        builder.HasMany(c => c.Products)
+            .WithOne(c => c.Category);
     }
 }

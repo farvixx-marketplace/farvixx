@@ -1,5 +1,4 @@
-﻿using BunnyCDN.Net.Storage;
-using DigitalMarketplace.Core.DTOs;
+﻿using DigitalMarketplace.Core.DTOs;
 using DigitalMarketplace.Core.DTOs.Products;
 using DigitalMarketplace.Core.Services;
 using Microsoft.AspNetCore.Authorization;
@@ -9,11 +8,9 @@ namespace DigitalMarketplace.Api.Controllers;
 [Route("api/[controller]")]
 [ApiController]
 public class ProductsController(
-    IProductService productService,
-    BunnyCDNStorage bunnyCDNStorage) : ControllerBase
+    IProductService productService) : ControllerBase
 {
     private readonly IProductService _productService = productService;
-    private readonly BunnyCDNStorage _storage = bunnyCDNStorage;
 
     [HttpGet]
     public async Task<ActionResult<ServiceResponse<IEnumerable<GetProductDto>>>> GetProductsAsync() => await _productService.GetProducts();
@@ -21,7 +18,7 @@ public class ProductsController(
     [HttpGet("id/{productId:guid}")]
     public async Task<ActionResult<ServiceResponse<GetProductFullDto>>> GetProductById(Guid productId)
     {
-        var response = new ServiceResponse<GetProductFullDto>();
+        ServiceResponse<GetProductFullDto> response;
         try
         {
             response = await _productService.GetProductById(productId);
@@ -42,15 +39,42 @@ public class ProductsController(
         return response;
     }
 
-    [HttpPost("upload-content")]
-    [AllowAnonymous]
-    public async Task<IActionResult> UploadContent(IFormFile formFile)
+    [HttpPost]
+    [Authorize]
+    public async Task<IActionResult> CreateProduct([FromForm]AddProductDto addProduct, IFormFile content)
     {
-        var stream = formFile.OpenReadStream();
+        var userId = HttpContext.Items["UserId"];
+        if (userId == null)
+        {
+            return Unauthorized();
+        }
+        try
+        {
+            var productCreated = await _productService.AddProduct((Guid)userId, addProduct, content.OpenReadStream());
+            if (productCreated == null || !productCreated.Success)
+            {
+                return BadRequest(productCreated);
+            }
+            return CreatedAtAction(nameof(CreateProduct), productCreated);
+        }
+        catch (Exception)
+        {
+            throw;
+        }
+    }
 
-        var response = await _productService.UploadProductContent(stream, formFile.FileName);
+    [HttpPatch("id/{productId:guid}/content")]
+    public async Task<IActionResult> ReplaceProductContent(Guid productId, IFormFile content)
+    {
+        if (HttpContext.Items["UserId"] is null)
+            return Unauthorized();
+        var userId = (Guid)HttpContext.Items["UserId"]!;
 
-        return Ok(response);
+        var updateRespose = await _productService.UpdateProductContent(userId, productId, content.OpenReadStream());
+        if (updateRespose.Success)
+            return Ok(updateRespose);
+
+        return BadRequest(updateRespose);
     }
 
     [HttpGet("download-content")]

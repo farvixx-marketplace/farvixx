@@ -1,6 +1,5 @@
 ﻿using DigitalMarketplace.Core.DTOs;
 using DigitalMarketplace.Core.DTOs.Users;
-using DigitalMarketplace.Core.Models;
 
 namespace DigitalMarketplace.Core.Services;
 public interface IUserService

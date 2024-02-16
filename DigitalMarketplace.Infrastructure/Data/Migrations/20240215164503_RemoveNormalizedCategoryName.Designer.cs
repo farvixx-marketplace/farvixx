@@ -3,6 +3,7 @@ using System;
 using DigitalMarketplace.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace DigitalMarketplace.Infrastructure.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240215164503_RemoveNormalizedCategoryName")]
+    partial class RemoveNormalizedCategoryName
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -21,21 +24,6 @@ namespace DigitalMarketplace.Infrastructure.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
-
-            modelBuilder.Entity("CategoryUser", b =>
-                {
-                    b.Property<Guid>("CategoriesId")
-                        .HasColumnType("uuid");
-
-                    b.Property<Guid>("UsersId")
-                        .HasColumnType("uuid");
-
-                    b.HasKey("CategoriesId", "UsersId");
-
-                    b.HasIndex("UsersId");
-
-                    b.ToTable("CategoryUser");
-                });
 
             modelBuilder.Entity("DigitalMarketplace.Core.Models.Category", b =>
                 {
@@ -51,9 +39,14 @@ namespace DigitalMarketplace.Infrastructure.Migrations
                     b.Property<Guid?>("ParentId")
                         .HasColumnType("uuid");
 
+                    b.Property<Guid?>("UserId")
+                        .HasColumnType("uuid");
+
                     b.HasKey("Id");
 
                     b.HasIndex("ParentId");
+
+                    b.HasIndex("UserId");
 
                     b.ToTable("Categories");
                 });
@@ -99,6 +92,7 @@ namespace DigitalMarketplace.Infrastructure.Migrations
                         .HasColumnType("uuid");
 
                     b.Property<string>("Content")
+                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<DateTime?>("CreatedAt")
@@ -392,26 +386,15 @@ namespace DigitalMarketplace.Infrastructure.Migrations
                     b.ToTable("UserTokens", (string)null);
                 });
 
-            modelBuilder.Entity("CategoryUser", b =>
-                {
-                    b.HasOne("DigitalMarketplace.Core.Models.Category", null)
-                        .WithMany()
-                        .HasForeignKey("CategoriesId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("DigitalMarketplace.Core.Models.User", null)
-                        .WithMany()
-                        .HasForeignKey("UsersId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
             modelBuilder.Entity("DigitalMarketplace.Core.Models.Category", b =>
                 {
                     b.HasOne("DigitalMarketplace.Core.Models.Category", "Parent")
                         .WithMany("Children")
                         .HasForeignKey("ParentId");
+
+                    b.HasOne("DigitalMarketplace.Core.Models.User", null)
+                        .WithMany("Categories")
+                        .HasForeignKey("UserId");
 
                     b.Navigation("Parent");
                 });
@@ -419,7 +402,7 @@ namespace DigitalMarketplace.Infrastructure.Migrations
             modelBuilder.Entity("DigitalMarketplace.Core.Models.Product", b =>
                 {
                     b.HasOne("DigitalMarketplace.Core.Models.Category", "Category")
-                        .WithMany("Products")
+                        .WithMany()
                         .HasForeignKey("CategoryId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -608,8 +591,6 @@ namespace DigitalMarketplace.Infrastructure.Migrations
             modelBuilder.Entity("DigitalMarketplace.Core.Models.Category", b =>
                 {
                     b.Navigation("Children");
-
-                    b.Navigation("Products");
                 });
 
             modelBuilder.Entity("DigitalMarketplace.Core.Models.Product", b =>
@@ -619,6 +600,8 @@ namespace DigitalMarketplace.Infrastructure.Migrations
 
             modelBuilder.Entity("DigitalMarketplace.Core.Models.User", b =>
                 {
+                    b.Navigation("Categories");
+
                     b.Navigation("Products");
 
                     b.Navigation("Tags");

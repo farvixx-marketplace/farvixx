@@ -6,7 +6,7 @@ public record GetProductFullDto(
     Guid Id,
     string Title,
     string Description,
-    
+    string? Content,
     decimal Price,
     Currency Currency,
     Category Category,

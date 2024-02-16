@@ -1,9 +1,7 @@
 ﻿using DigitalMarketplace.Core.DTOs;
 using DigitalMarketplace.Core.DTOs.Auth;
 using DigitalMarketplace.Core.Services;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using System.IdentityModel;
 
 namespace DigitalMarketplace.Api.Controllers;
 [Route("api/[controller]")]
@@ -51,7 +49,7 @@ public class AuthController(IAuthService authService) : ControllerBase
     }
 
     [HttpPost("refresh")]
-    public async Task<ActionResult<ServiceResponse<Tokens>>> Refresh([FromBody] string refreshToken)
+    public async Task<ActionResult<ServiceResponse<Tokens>>> Refresh(string refreshToken)
     {
         ServiceResponse<Tokens> response;
         try

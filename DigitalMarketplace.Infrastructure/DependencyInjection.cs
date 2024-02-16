@@ -4,7 +4,6 @@ using DigitalMarketplace.Infrastructure.Data;
 using DigitalMarketplace.Infrastructure.Services;
 using Mailjet.Client;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace DigitalMarketplace.Infrastructure;

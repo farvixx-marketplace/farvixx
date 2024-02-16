@@ -42,7 +42,8 @@ internal class UserConfiguration : IEntityTypeConfiguration<User>
 
         builder.HasMany(u => u.Tags);
 
-        builder.HasMany(u => u.Categories);
+        builder.HasMany(u => u.Categories)
+            .WithMany(c => c.Users);
 
         builder.OwnsMany(u => u.ExternalResources)
             .WithOwner();
@@ -51,7 +52,8 @@ internal class UserConfiguration : IEntityTypeConfiguration<User>
             .HasColumnType("text");
 
         builder.HasMany(u => u.Products)
-            .WithOne(p => p.Owner);
+            .WithOne(p => p.Owner)
+            .HasForeignKey(p => p.OwnerId);
 
         builder.Property(u => u.Balance);
 
